@@ -8,6 +8,7 @@ from collections import defaultdict
 import gspread
 from google.oauth2.service_account import Credentials
 from apple_health_parser.functions import get_line
+from argparse import ArgumentParser
 
 Cell = gspread.cell.Cell
 
@@ -562,4 +563,22 @@ def main(year,week_nbr):
 
 
 if __name__== "__main__":
-    main(2026,13)
+    # Parse input arguments to import the right week
+    parser = ArgumentParser()
+    parser.add_argument("-year", default=datetime.datetime.now().year)
+    parser.add_argument("-week", default=datetime.datetime.now().isocalendar().week - 1)
+    args = parser.parse_args()
+    year = int(args.year)
+    week = int(args.week)
+
+    cw = Week(year, week)
+    # Display welcome message
+    print(
+        "Welcome to the BG-coaching importer.\nCurrent setting: Apple health importer."
+    )
+    print(
+        f"Importing week {args.week}, {args.year}. Spanning {cw.start_date} to {cw.end_date}."
+    )
+
+    
+    main(year,week)
