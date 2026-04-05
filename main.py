@@ -9,6 +9,11 @@ import gspread
 from google.oauth2.service_account import Credentials
 from apple_health_parser.functions import get_line
 from argparse import ArgumentParser
+from platformdirs import user_downloads_dir
+import zipfile
+from pathlib import Path
+import os
+import shutil
 
 Cell = gspread.cell.Cell
 
@@ -417,6 +422,13 @@ def main(year,week_nbr):
     cw = Week(year,week_nbr)
     print(("Start date:",str(cw.start_date),"end date",str(cw.end_date)))
 
+    # Find and extract .zip files in download folder
+    zipFilePath = Path(user_downloads_dir(),"export.zip")
+    with zipfile.ZipFile(zipFilePath, "r") as z:
+        z.extract("apple_health_export/export.xml", "data/")
+    
+    os.remove(zipFilePath)
+
     xml_path = "data/apple_health_export/export.xml"
     source_name = {"Thomas’s Apple Watch"}
 
@@ -519,6 +531,9 @@ def main(year,week_nbr):
         #print(curr_date, "RHR:", day.metrics["RHR"].value)
         
     print("Data loaded for the desired week.")
+    print("Removing data...")
+    shutil.rmtree("data/apple_health_export")
+    print("Done")
     # Open user settings and write
     TOSJ = user_settings()
 
